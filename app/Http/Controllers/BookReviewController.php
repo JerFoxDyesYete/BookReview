@@ -8,18 +8,14 @@ use Illuminate\Support\Facades\Validator;
 
 class BookReviewController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $reviews = BookReview::all();
-        return response()->json($reviews);
+        if ($request->user()) {
+            return response()->json($request->user()->bookReviews);
+        }
+        return response()->json(BookReview::all());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -33,14 +29,13 @@ class BookReviewController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $review = BookReview::create($validator->validated());
+        $validated = $validator->validated();
+        $validated['user_id'] = $request->user()->id;
+        $review = BookReview::create($validated);
 
         return response()->json($review, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $review = BookReview::find($id);
@@ -52,15 +47,17 @@ class BookReviewController extends Controller
         return response()->json($review);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $review = BookReview::find($id);
         
         if (!$review) {
             return response()->json(['message' => 'Review not found'], 404);
+        }
+
+        // Check if the user owns the review
+        if ($request->user()->id !== $review->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -79,15 +76,17 @@ class BookReviewController extends Controller
         return response()->json($review);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $review = BookReview::find($id);
         
         if (!$review) {
             return response()->json(['message' => 'Review not found'], 404);
+        }
+
+        // Check if the user owns the review
+        if ($request->user()->id !== $review->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $review->delete();
