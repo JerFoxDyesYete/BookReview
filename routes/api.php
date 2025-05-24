@@ -6,13 +6,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookReviewController;
 
 // Public routes
-Route::post('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::get('/book-reviews', [BookReviewController::class, 'index'])->name('book-reviews.index');
-Route::get('/book-reviews/{id}', [BookReviewController::class, 'show'])->name('book-reviews.show');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/book-reviews', [BookReviewController::class, 'index']);
+Route::get('/book-reviews/{id}', [BookReviewController::class, 'show']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::resource('book-reviews', BookReviewController::class)->except(['index', 'show']);
 });
