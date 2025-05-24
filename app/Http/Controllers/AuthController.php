@@ -24,6 +24,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
+            'message' => 'User registered successfully',
             'user' => $user,
             'token' => $user->createToken('auth_token')->plainTextToken
         ], 201);
@@ -45,6 +46,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
+            'message' => 'Login successful',
             'user' => $user,
             'token' => $user->createToken('auth_token')->plainTextToken
         ]);
@@ -53,6 +55,14 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function unauthorized()
+    {
+        return response()->json([
+            'message' => 'Unauthorized. Please log in to perform this action.'
+        ], 401);
     }
 }
